@@ -1,0 +1,620 @@
+PRG1
+def aStarAlgo(start_node, stop_node):
+         
+        open_set = set(start_node) 
+        closed_set = set()
+        g = {} #store distance from starting node
+        parents = {}# parents contains an adjacency map of all nodes
+ 
+        #ditance of starting node from itself is zero
+        g[start_node] = 0
+        #start_node is root node i.e it has no parent nodes
+        #so start_node is set to its own parent node
+        parents[start_node] = start_node
+         
+         
+        while len(open_set) > 0:
+            n = None
+ 
+            #node with lowest f() is found
+            for v in open_set:
+                if n == None or g[v] + heuristic(v) < g[n] + heuristic(n):
+                    n = v
+             
+                     
+            if n == stop_node or Graph_nodes[n] == None:
+                pass
+            else:
+                for (m, weight) in get_neighbors(n):
+                   #nodes 'm' not in first and last set are added to first
+                    #n is set its parent
+                    if m not in open_set and m not in closed_set:
+                        open_set.add(m)
+                        parents[m] = n
+                        g[m] = g[n] + weight
+                         
+     
+                    #for each node m,compare its distance from start i.e g(m) to the
+                    #from start through n node
+                    else:
+                        if g[m] > g[n] + weight:
+                            #update g(m)
+                            g[m] = g[n] + weight
+                            #change parent of m to n
+                            parents[m] = n
+                             
+                            #if m in closed set,remove and add to open
+                            if m in closed_set:
+                                closed_set.remove(m)
+                                open_set.add(m)
+ 
+            if n == None:
+                print('Path does not exist!')
+                return None
+ 
+            # if the current node is the stop_node
+            # then we begin reconstructin the path from it to the start_node
+            if n == stop_node:
+                path = []
+ 
+                while parents[n] != n:
+                    path.append(n)
+                    n = parents[n]
+ 
+                path.append(start_node)
+ 
+                path.reverse()
+ 
+                print('Path found: {}'.format(path))
+                return path
+ 
+ 
+            # remove n from the open_list, and add it to closed_list
+            # because all of his neighbors were inspected
+            open_set.remove(n)
+            closed_set.add(n)
+ 
+        print('Path does not exist!')
+        return None
+         
+#define fuction to return neighbor and its distance
+#from the passed node
+def get_neighbors(v):
+    if v in Graph_nodes:
+        return Graph_nodes[v]
+    else:
+        return None
+#for simplicity we ll consider heuristic distances given
+#and this function returns heuristic distance for all nodes
+def heuristic(n):
+        H_dist = {
+            'A': 10,
+            'B': 8,
+            'C': 5,
+            'D': 7,
+            'E': 3,
+            'F': 6,
+            'G': 5,
+            'H': 3,
+            'I': 1,
+            'J': 0             
+        }
+ 
+        return H_dist[n]
+ 
+#Describe your graph here  
+Graph_nodes = {
+    'A': [('B', 6), ('F', 3)],
+    'B': [('C', 3), ('D', 2)],
+    'C': [('D', 1), ('E', 5)],
+    'D': [('C', 1), ('E', 8)],
+    'E': [('I', 5), ('J', 5)],
+    'F': [('G', 1),('H', 7)] ,
+    'G': [('I', 3)],
+    'H': [('I', 2)],
+    'I': [('E', 5), ('J', 3)],
+     
+}
+aStarAlgo('A', 'J')
+
+PRG2
+
+h1={
+    'A':1,
+    'B':6,
+    'C':2,
+    'D':12,
+    'E':2,
+    'F':1,
+    'G':5,
+    'H':7,
+    'I':7,
+    'J':1
+}
+
+graph={
+    'A':[[('B',1),('C',1)],[('D',1)]],
+    'B':[[('G',1)],[('H',1)]],
+    'C':[[('J',1)]],
+    'D':[[('E',1),('F',1)]],
+    'G':[[('I',1)]]
+}
+
+solutionGraph={}
+parents={}
+status={}
+start='A'
+
+def setstatus(v,val):
+    status[v]=val
+def getstatus(v):
+    return status.get(v,0)
+def setheuristic(v,val):
+    h1[v]=val
+def getheuristic(v):
+    return h1[v]
+def getneighbors(v):
+    return graph.get(v,'')
+
+def costToMinChild(v):
+    mincost=0
+    childListDict={}
+    childListDict[mincost]=[]
+    flag=True
+    for childListTuple in getneighbors(v):
+        cost=0
+        childlist=[]
+        for m,weight in childListTuple:
+            cost+=getheuristic(m)+weight
+            childlist.append(m)
+        if flag==True:
+            mincost=cost
+            childListDict[mincost]=childlist
+            flag=False
+        else:
+            if mincost>cost:
+                mincost=cost
+                childListDict[mincost]=childlist
+    return mincost,childListDict[mincost]
+    
+def aostar(v,backTracking):
+    print('heuristic val: ',h1)
+    print('processing node: ',v)
+    print('solution graph: ',solutionGraph)
+    print('--------------------------')
+    if getstatus(v)>=0:
+        mincost,childlist=costToMinChild(v)
+        setheuristic(v,mincost)
+        setstatus(v,len(childlist))
+        solved=True  
+        for child in childlist:
+            parents[child]=v
+            if getstatus(child)!=-1:
+                solved=False      
+        if solved==True:
+            setstatus(v,-1)
+            solutionGraph[v]=childlist       
+        if v!=start:
+            aostar(parents[v],True)        
+        if backTracking==False:
+            for child in childlist:
+                setstatus(child,0)
+                aostar(child,False)
+                
+aostar('A',False)
+print(solutionGraph)
+
+
+PRG03
+import numpy as np
+import pandas as pd
+data = pd.DataFrame(data=pd.read_csv('1finds.csv'))
+concepts = np.array(data.iloc[:,0:-1])
+target = np.array(data.iloc[:,-1])
+def learn(concepts, target):
+    specific_h = concepts[0].copy()
+    general_h = [["?" for i in range(len(specific_h))] for i in range(len(specific_h))]
+    for i, h in enumerate(concepts):
+        if target[i] == "Yes":
+            for x in range(len(specific_h)):
+                if h[x] != specific_h[x]:
+                    specific_h[x] = '?'
+                    general_h[x][x] = '?'
+        if target[i] == "No":
+            for x in range(len(specific_h)):
+                if h[x] != specific_h[x]:
+                    general_h[x][x] = specific_h[x]
+                else:
+                    general_h[x][x] = '?'
+    indices = [i for i,val in enumerate(general_h) if val == ['?', '?', '?', '?', '?', '?']]
+    for i in indices:
+        general_h.remove(['?', '?', '?', '?', '?', '?'])
+    return specific_h, general_h
+s_final, g_final = learn(concepts, target)
+print("Final S:", s_final, sep="\n")
+print("Final G:", g_final, sep="\n")
+
+
+PRG05
+import numpy as np
+X = np.array(([2, 9], [1, 5], [3, 6]), dtype=float)
+y = np.array(([92], [86], [89]), dtype=float)
+X = X/np.amax(X,axis=0) 
+y = y/100
+
+def sigmoid (x):
+    return 1/(1 + np.exp(-x))
+
+def derivatives_sigmoid(x):
+    return x * (1 - x)
+
+epoch=5000 
+lr=0.1 
+inputlayer_neurons = 2 
+hiddenlayer_neurons = 3 
+output_neurons = 1 
+
+
+wh=np.random.uniform(size=(inputlayer_neurons,hiddenlayer_neurons))
+bh=np.random.uniform(size=(1,hiddenlayer_neurons))
+wout=np.random.uniform(size=(hiddenlayer_neurons,output_neurons))
+bout=np.random.uniform(size=(1,output_neurons))
+
+for i in range(epoch):
+    hinp1=np.dot(X,wh)
+    hinp=hinp1 + bh
+    hlayer_act = sigmoid(hinp)
+    outinp1=np.dot(hlayer_act,wout)
+    outinp= outinp1+ bout
+    output = sigmoid(outinp)
+    
+    EO = y-output
+    #print("epoch=",i,"Error=",EO)
+    outgrad = derivatives_sigmoid(output)
+    d_output = EO* outgrad
+    EH = d_output.dot(wout.T)
+    
+    hiddengrad = derivatives_sigmoid(hlayer_act)
+    d_hiddenlayer = EH * hiddengrad
+
+    wout += hlayer_act.T.dot(d_output) *lr
+    wh += X.T.dot(d_hiddenlayer) *lr
+print("Input: \n" + str(X))
+print("Actual Output: \n" + str(y))
+print("Predicted Output: \n" ,output)
+
+PRG06
+import numpy as np
+import pandas as pd
+#creating a dataset
+person = pd.DataFrame()
+#creating target variable
+person['Gender'] = ['male','male','male','male','female','female','female','female']
+#creating our feature variables
+person['Height'] = [6,5.92,5.58,5.92,5,5.5,5.42,5.75]
+person['Weight'] = [180,190,170,165,100,150,130,150]
+person['Foot_Size'] = [12,11,12,10,6,8,7,9]
+#view the data
+print("\n Dataset")
+print("")
+print(person)
+#create an empty data frame
+data = pd.DataFrame()
+#creating some feature values for this single row
+data['Gender']=['male','male','male','male','male','male','male','male','male','male','male','male','male','male','male','male','male','male','male','male','female','female','female','female','female','female','female','female','female','female','female','female','female','female','female','female','female','female','female','female']
+data['Height'] =[5.82,5.77,5.87,5.99,6.07,6.13,6.06,5.99,6.21,5.81,5.57,5.15,6.02,5.93,5.91,5.63,5.86,5.93,5.59,5.77,5.60,5.40,5,5.75,5.7,5.2,5.1,5.73,5.74,5,5.8,5.77,5.82,5.60,5.40,5,5.75,5.43,5.12,5.55]
+data['Weight'] =[172,171,180,163,169,181,185,168,166,164,175,172,167,140,174,183,133,111,162,177,154,134,137,150,155,136,132,140,154,146,141,145,142,158,155,155,152,150,139,160]
+data['Foot_Size'] =[10,11,12,11,12,11,12,13,13,10,11,13,12,12,6,7,12,13,8,9,7,6,5,9,5,6,5,7,6,5,5,9,5,7,6,6,9,12,9,10]
+#view the data
+print('\n Test Instance: ')
+print(" ")
+print(data)
+n_male = data['Gender'][data['Gender'] == 'male'].count()
+n_male
+n_female = data['Gender'][data['Gender'] == 'female'].count()
+n_female
+#total rows
+total_ppl = data['Gender'].count()
+total_ppl
+p_male = n_male / total_ppl #(4/8)
+p_male
+p_female = n_female / total_ppl #(4/8)
+p_female
+# group the data by gender & calculate the means of each feature
+# for eg - height = (6+5.92+5.58+5.92) / 4
+data_means = data.groupby('Gender').mean()
+data_means
+#calculate of mean
+print('\n Dataset Mean')
+print(" ")
+print(data_means)
+# calculate the data variance
+# variance = summation of((mean - x) ** 2) / n
+data_variance = data.groupby('Gender').var()
+print(data_variance)
+#mean for male
+male_height_mean = data_means['Height'][data_means.index == 'male'].values[0]
+male_weight_mean = data_means['Weight'][data_means.index == 'male'].values[0]
+male_footsize_mean = data_means['Foot_Size'][data_means.index == 'male'].values[0]
+print("male_height_mean: ", male_height_mean)
+print("male_weight_mean: ", male_weight_mean)
+print("male_footsize_mean: ", male_footsize_mean)
+#variance for male
+male_height_variance = data_variance['Height'][data_variance.index == 'male'].values[0]
+male_weight_variance = data_variance['Weight'][data_variance.index == 'male'].values[0]
+male_footsize_variance = data_variance['Foot_Size'][data_variance.index =='male'].values[0]
+print("male_height_variance: ",male_height_variance)
+print("male_weight_variance: ",male_weight_variance)
+print("male_footsize_variance: ",male_footsize_variance)
+# for female now
+# mean for female
+female_height_mean = data_means['Height'][data_means.index == 'female'].values[0]
+female_weight_mean = data_means['Weight'][data_means.index == 'female'].values[0]
+female_footsize_mean = data_means['Foot_Size'][data_means.index == 'female'].values[0]
+print("female_height_mean: ", female_height_mean)
+print("female_weight_mean: ", female_weight_mean)
+print("female_footsize_mean: ", female_footsize_mean)
+#variance for female
+female_height_variance = data_variance['Height'][data_variance.index == 'female'].values[0]
+female_weight_variance = data_variance['Weight'][data_variance.index == 'female'].values[0]
+female_footsize_variance = data_variance['Foot_Size'][data_variance.index== 'female'].values[0]
+print("female_height_variance: ",female_height_variance)
+print("female_weight_variance: ",female_weight_variance)
+print("female_footsize_variance: ",female_footsize_variance)
+# create a function which calculates p(x|y)
+def p_x_given_y(x,mean_y, variance_y):
+#input the arguments into a probability density function
+    p = 1/(np.sqrt(2*np.pi*variance_y))* np.exp((-(x-mean_y) ** 2)/(2*variance_y))
+    return p
+count=0
+# numerator of the posterior if the unclassified observation is a male
+for i in range(len(person)):
+    print('\n Probability male: ')
+    prob_male = p_male*p_x_given_y(person['Height'][i],male_height_mean,male_height_variance)*p_x_given_y(person['Weight'][i],male_weight_mean,male_weight_variance)* p_x_given_y(person['Foot_Size'][i],male_footsize_mean,male_footsize_variance)
+    print(prob_male)
+    print('\n Probability female: ')
+    prob_female = p_female*p_x_given_y(person['Height'][i],female_height_mean,female_height_variance)*p_x_given_y(person['Weight'][i],female_weight_mean,female_weight_variance)*p_x_given_y(person['Foot_Size'][i],female_footsize_mean,female_footsize_variance)
+    print(prob_female)
+    if(prob_male > prob_female):
+        print(f"target label: male for {i} ")
+        if(person['Gender'][i]=='male'):
+            count+=1
+    else:
+        print(f"target label: Female for {i} ")
+        if (person['Gender'][i]=='female'):
+            count+=1
+print(f"Accuracy {((count)/8)*100}")
+
+
+
+
+
+PRG07
+import matplotlib.pyplot as plt
+from sklearn import datasets
+from sklearn.cluster import KMeans
+import pandas as pd
+import numpy as np
+iris = datasets.load_iris()
+X = pd.DataFrame(iris.data)
+X.columns = ['Sepal_Length','Sepal_Width','Petal_Length','Petal_Width']
+y = pd.DataFrame(iris.target)
+y.columns = ['Targets']
+model = KMeans(n_clusters=3)
+model.fit(X) 
+plt.figure(figsize=(14,14))
+colormap = np.array(['red', 'lime', 'black'])
+plt.subplot(2, 2, 1)
+plt.scatter(X.Petal_Length, X.Petal_Width, c=colormap[y.Targets], s=40)
+plt.title('Real Clusters')
+plt.xlabel('Petal Length')
+plt.ylabel('Petal Width')
+plt.subplot(2, 2, 2)
+plt.scatter(X.Petal_Length, X.Petal_Width, c=colormap[model.labels_], s=40)
+plt.title('K-Means Clustering')
+plt.xlabel('Petal Length')
+plt.ylabel('Petal Width')
+from sklearn import preprocessing
+scaler = preprocessing.StandardScaler()
+scaler.fit(X)
+xsa = scaler.transform(X)
+xs = pd.DataFrame(xsa, columns = X.columns)
+from sklearn.mixture import GaussianMixture
+gmm = GaussianMixture(n_components=3)
+gmm.fit(xs)
+gmm_y = gmm.predict(xs)
+plt.subplot(2, 2, 3)
+plt.scatter(X.Petal_Length, X.Petal_Width, c=colormap[gmm_y], s=40)
+plt.title('GMM Clustering')
+plt.xlabel('Petal Length')
+plt.ylabel('Petal Width')
+print('''Observation: The GMM using EM algorithm based clustering matched the 
+true labels more closely than the Kmeans.''')
+
+
+
+PRG08
+from sklearn.datasets import load_iris
+from sklearn.neighbors import KNeighborsClassifier
+import numpy as np
+from sklearn.model_selection import train_test_split
+iris_dataset=load_iris()
+#display the iris dataset
+print("\n IRIS FEATURES \ TARGET NAMES: \n ", iris_dataset.target_names)
+for i in range(len(iris_dataset.target_names)):
+    print("\n[{0}]:[{1}]".format(i,iris_dataset.target_names[i]))
+print("\n IRIS DATA :\n",iris_dataset["data"])
+#split the data into training and testing data
+X_train, X_test, y_train, y_test = train_test_split(iris_dataset["data"],iris_dataset["target"], random_state=0)
+print("\n Target :\n",iris_dataset["target"])
+print("\n X TRAIN \n", X_train)
+print("\n X TEST \n", X_test)
+print("\n Y TRAIN \n", y_train)
+print("\n Y TEST \n", y_test)
+#train and fit the model
+kn = KNeighborsClassifier(n_neighbors=5)
+kn.fit(X_train, y_train)
+#predicting from model
+x_new = np.array([[5, 2.9, 1, 0.2]])
+print("\n XNEW \n",x_new)
+prediction = kn.predict(x_new)
+print("\n Predicted target value: {}\n".format(prediction))
+print("\n Predicted feature name: {}\n".format(iris_dataset["target_names"][prediction]))
+i=1
+x= X_test[i]
+x_new = np.array([x])
+print("\n XNEW \n",x_new)
+for i in range(len(X_test)):
+    x = X_test[i]
+    x_new = np.array([x])
+    prediction = kn.predict(x_new)
+    print("\n Actual : {0} {1}, Predicted :{2}{3}".format(y_test[i],iris_dataset["target_names"][y_test[i]],prediction,iris_dataset["target_names"][ prediction]))
+print("\n TEST SCORE[ACCURACY]: {:.2f}\n".format(kn.score(X_test, y_test)))
+
+
+
+
+PRG09
+import numpy as np
+import matplotlib.pyplot as plt
+
+def local_regression(x0, X, Y, tau):
+    x0 = [1, x0]
+    X = [[1, i] for i in X]
+    X =  np.asarray(X)
+    xw = (X.T) * np.exp(np.sum((X - x0) ** 2, axis=1) / (-2 * tau))
+    beta = np.linalg.pinv(xw @ X) @xw @Y @x0
+    return beta
+
+def draw(tau):
+    prediction = [local_regression(x0, X, Y, tau) for x0 in domain]
+    plt.plot(X, Y, 'o', color="black")
+    plt.plot(domain, prediction, color="red")
+    plt.show()
+
+X = np.linspace(-3, 3, num=1000)
+domain = X
+Y = np.log(np.abs (X ** 2-1) + .5)
+
+draw(10)
+draw(0.1)
+draw(0.01)
+draw(0.001)
+
+
+PRG04
+import math
+import csv
+
+def load_csv(filename):
+    lines=csv.reader(open(filename,"r"));
+    dataset = list(lines)
+    headers = dataset.pop(0)
+    return dataset,headers
+
+class Node:
+    def __init__ (self,attribute):
+        self.attribute=attribute
+        self.children=[]
+        self.answer=""
+
+
+def subtables(data,col,delete):
+    dic={}
+    coldata=[row[col] for row in data]
+    attr=list(set(coldata))
+    counts=[0]*len(attr)
+    r=len(data)
+    c=len(data[0])
+    for x in range(len(attr)):
+        for y in range(r):
+            if data[y][col]==attr[x]:
+                counts[x]+=1
+    for x in range(len(attr)):
+        dic[attr[x]]=[[0 for i in range(c)] for j in range(counts[x])]
+        pos=0
+        for y in range(r):
+            if data[y][col]==attr[x]:
+                if delete:
+                    del data[y][col]
+                dic[attr[x]][pos]=data[y]
+                pos+=1
+    return attr,dic
+
+def entropy(S):
+    attr=list(set(S))
+    if len(attr)==1:
+        return 0
+    counts=[0,0]
+    for i in range(2):
+        counts[i]=sum([1 for x in S if attr[i]==x])/(len(S)*1.0)
+    sums=0
+    for cnt in counts:
+        sums+=-1*cnt*math.log(cnt,2)
+    return sums
+
+def compute_gain(data,col):
+    attr,dic = subtables(data,col,delete=False)
+    total_size=len(data)
+    entropies=[0]*len(attr)
+    ratio=[0]*len(attr)
+    total_entropy=entropy([row[-1] for row in data])
+    for x in range(len(attr)):
+        ratio[x]=len(dic[attr[x]])/(total_size*1.0)
+        entropies[x]=entropy([row[-1] for row in dic[attr[x]]])
+
+        total_entropy-=ratio[x]*entropies[x]
+    return total_entropy
+
+def build_tree(data,features):
+    lastcol=[row[-1] for row in data]
+    if(len(set(lastcol)))==1:
+        node=Node("")
+        node.answer=lastcol[0]
+        return node
+    n=len(data[0])-1
+    gains=[0]*n
+    for col in range(n):
+        gains[col]=compute_gain(data,col)
+    split=gains.index(max(gains))
+    node=Node(features[split])
+    fea = features[:split]+features[split+1:]
+    attr,dic=subtables(data,split,delete=True)
+    for x in range(len(attr)):
+        child=build_tree(dic[attr[x]],fea)
+        node.children.append((attr[x],child))
+    return node
+
+def print_tree(node,level):
+    if node.answer!="":
+        print("----> "*level,node.answer)
+        return
+    print("----> "*level,node.attribute)
+    for value,n in node.children:
+        print("----> "*(level+1),value)
+        print_tree(n,level+2)
+
+def classify(node,x_test,features):
+    if node.answer!="":
+        print(node.answer)
+        return
+    pos=features.index(node.attribute)
+    for value, n in node.children:
+        if x_test[pos]==value:
+            classify(n,x_test,features)
+
+
+dataset,features=load_csv("tennis1.csv")
+node1=build_tree(dataset,features)
+print("The decision tree for the dataset using ID3 algorithm is")
+print_tree(node1,0)
+testdata,features=load_csv("tennis.csv")
+for xtest in testdata:
+    print("The test instance:",xtest)
+    print("The label for test instance:",end=" ")
+    classify(node1,xtest,features)
+
+
+
+
+
